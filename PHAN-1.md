@@ -120,7 +120,7 @@ Response 200 có năm phần ở cấp ngoài:
 - `labels` là mảng tên nhãn.
 - `history` là mảng lịch sử, sắp xếp tăng dần theo `createdAt`. Mỗi bản ghi có `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`.
 
-Item không tồn tại hoặc đã xóa mềm trả 404. Không chạy thêm một query riêng cho từng label hoặc từng history.
+Item không tồn tại hoặc đã xóa mềm trả 404. Response cần có đủ dữ liệu quan hệ, kể cả khi item chưa có assignee hoặc history.
 
 ### P1-R04. Tạo công việc (20 điểm)
 
@@ -221,27 +221,26 @@ Một dòng trong response trên dữ liệu mẫu vừa tạo:
 - Khoảng ngày hoặc `minItems` không hợp lệ trả 400.
 - Aggregate bằng truy vấn database; không tải toàn bộ bảng về để cộng bằng vòng lặp.
 
-### P1-R08. Xử lý lỗi chung (5 điểm)
+### P1-R08. Response lỗi (5 điểm)
 
-- Mọi response có header `X-Correlation-Id`.
-- Nếu request gửi một GUID hợp lệ thì giữ nguyên; nếu thiếu hoặc sai thì tạo GUID mới.
-- Lỗi không dự kiến trả 500 và không làm lộ thông tin nội bộ.
-- Xử lý lỗi tại một nơi chung bằng middleware hoặc exception handler; không lặp `try/catch` ở từng Controller.
+- Các lỗi đầu vào, không tìm thấy và vi phạm nghiệp vụ trả đúng mã HTTP đã nêu ở từng API.
+- Response lỗi có cùng cấu trúc ở các route. Lỗi đầu vào cần chỉ rõ field chưa hợp lệ.
+- Lỗi không dự kiến trả 500. Không gửi stack trace, câu SQL hoặc thông tin kết nối database cho client.
 
 ### P1-Q01. Chất lượng code và bàn giao (10 điểm)
 
 - Project build và chạy được từ hướng dẫn đã nộp.
-- Controller, DTO, Service và phần truy cập dữ liệu được tách hợp lý.
-- Service Layer được đăng ký và sử dụng qua Dependency Injection.
-- Code thể hiện OOP rõ ràng, tên class/method dễ hiểu, không có một class xử lý toàn bộ hệ thống.
-- EF Core query dùng async và không tải dữ liệu thừa rõ ràng.
+- Code dễ đọc, tên biến và phương thức thể hiện đúng việc chúng làm.
+- Request và response chỉ chứa những trường cần thiết; không trả thừa dữ liệu từ database.
+- Các đoạn xử lý dùng lại ở nhiều nơi không bị chép lại nguyên khối.
+- EF Core dùng async khi đọc hoặc ghi database.
 - Không commit secret, `bin` hoặc `obj`.
 - Có hướng dẫn đủ để leader cấu hình database và chạy ứng dụng.
 
 ## 3. Lưu ý khi triển khai
 
 - Dữ liệu mẫu chỉ giúp bạn bắt đầu. API phải xử lý đúng khi database có thêm project, developer, work item và label khác.
-- Với filter, sort, paging và báo cáo, nên xây dựng truy vấn từ `IQueryable` để PostgreSQL thực hiện phần xử lý chính.
+- Việc lọc, sắp xếp, phân trang và tính báo cáo cần dựa trên dữ liệu trong PostgreSQL; tránh tải toàn bộ dữ liệu về rồi mới xử lý trong ứng dụng.
 - Những thao tác cùng tạo ra một kết quả nghiệp vụ cần nằm trong cùng transaction.
 - Nếu thiếu thời gian, hãy hoàn thiện từng API từ request đến dữ liệu trả về trước khi chuyển sang API tiếp theo.
 

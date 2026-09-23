@@ -16,23 +16,16 @@ Công nghệ bắt buộc: **ASP.NET Core .NET 10, EF Core 10 và PostgreSQL**.
 
 Trong giờ làm bài, bạn được dùng Google, tài liệu chính thức và Stack Overflow. Không được dùng AI, trao đổi hoặc nhận code từ người khác.
 
-## Yêu cầu về cách viết code
+## Cách tổ chức bài làm
 
-Hãy tổ chức code để người khác có thể đọc và tiếp tục phát triển:
+Hãy ưu tiên làm cho các route trả đúng kết quả và lưu đúng dữ liệu. Sau đó, sắp xếp code để người khác dễ đọc:
 
-- Controller tiếp nhận HTTP request và trả response; nghiệp vụ và truy vấn được tách sang lớp phù hợp.
-- Tách DTO dùng cho request/response khỏi entity dùng với EF Core.
-- Đưa nghiệp vụ vào Service Layer và đăng ký dependency bằng Dependency Injection.
-- Dùng class, interface và encapsulation hợp lý để mỗi lớp có trách nhiệm rõ ràng.
-- Áp dụng một Design Pattern cơ bản phù hợp với bài làm. Service Layer là một lựa chọn. Nếu dùng thêm Strategy, Specification hoặc Repository, hãy thể hiện rõ chúng giúp giải quyết vấn đề nào.
-- Truy vấn dữ liệu bằng EF Core; dùng async cho thao tác I/O.
-- Đọc connection string từ cấu hình; không đưa thông tin nhạy cảm thật vào source code.
+- Controller nhận request và trả response. Chỉ đưa ra những trường API cần.
+- Đặt tên biến và phương thức theo việc chúng làm. Nếu một đoạn xử lý được dùng ở nhiều nơi, tách nó ra để tránh chép lại.
+- Dùng EF Core để đọc và ghi PostgreSQL. Dùng async cho thao tác với database.
+- Đọc connection string từ cấu hình. Không đưa thông tin nhạy cảm thật vào source code.
 
-Có thể tổ chức bài trong một Web API project theo luồng:
-
-```text
-HTTP request → Controller → Service → EF Core/DbContext → PostgreSQL
-```
+Bạn có thể làm bài trong một Web API project. Tự chọn cách sắp xếp code phù hợp với những phần đã làm được.
 
 ## Bài cần nộp
 
