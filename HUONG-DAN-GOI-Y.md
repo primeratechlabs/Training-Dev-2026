@@ -4,7 +4,9 @@ Tài liệu này giúp bạn chọn điểm bắt đầu và giữ bài làm đi
 
 ## Trước khi viết code
 
-Hãy đọc một lượt các route trong đề để hình dung WorkBoard cần làm gì. Sau đó mở `database.sql`, xem các bảng, cột và mối liên hệ giữa chúng. Dữ liệu mẫu có những tình huống đáng chú ý như công việc chưa được giao, project đã đóng, developer không còn active, công việc đã xóa và project chưa có công việc. Nắm được các trường hợp này sẽ giúp bạn tránh chỉ làm API chạy đúng với một bản ghi quen thuộc.
+Hãy đọc một lượt các route trong đề để hình dung WorkBoard cần làm gì. Sau đó mở `database.sql`, xem các bảng, cột và mối liên hệ giữa chúng. Đây là cấu trúc database mà API cần làm việc cùng; không cần tạo thêm một bộ bảng khác. Tên trong PostgreSQL thường có dạng `work_items`, `assignee_id`, còn tên class và property trong C# thường được viết khác đi. Hãy kiểm tra cách EF Core ghép hai phía với nhau.
+
+Dữ liệu mẫu có những tình huống đáng chú ý như công việc chưa được giao, project đã đóng, developer không còn active, công việc đã xóa và project chưa có công việc. Nắm được các trường hợp này sẽ giúp bạn tránh chỉ làm API chạy đúng với một bản ghi quen thuộc.
 
 Bạn có thể ghi nhanh mỗi route theo bốn ý: nhận dữ liệu gì, cần tìm hoặc thay đổi dữ liệu nào, khi nào được xem là thành công, và trường hợp nào cần trả lỗi. Bảng ghi chú ngắn này sẽ hữu ích khi bạn bắt đầu code và khi kiểm tra lại.
 
@@ -24,7 +26,9 @@ Nếu cần chọn thứ tự làm, có thể bắt đầu từ route đọc d�
 
 EF Core giúp bạn đọc và ghi dữ liệu bằng C#. Với route danh sách, hãy đưa điều kiện lọc, cách sắp xếp và giới hạn trang vào truy vấn gửi tới PostgreSQL; tránh lấy toàn bộ bảng về rồi mới xử lý trong ứng dụng. Với báo cáo, hãy xác định rõ mỗi con số được tính từ những bản ghi nào trước khi viết phần tổng hợp.
 
-Một số thao tác tạo hoặc cập nhật cần ghi nhiều dữ liệu có liên quan. Hãy đọc kỹ đề để nhận ra thao tác nào phải được xem là một việc thống nhất: nếu một bước không thành công thì không nên để lại dữ liệu dở dang. EF Core có hỗ trợ transaction cho trường hợp này.
+Một số thao tác tạo hoặc cập nhật cần ghi nhiều dữ liệu có liên quan. Hãy đọc kỹ đề để nhận ra thao tác nào phải được xem là một việc thống nhất: nếu một bước không thành công thì không nên để lại dữ liệu dở dang. EF Core có hỗ trợ transaction cho trường hợp này. Với code của work item, PostgreSQL cấp `id`; bạn cần có `id` trước khi tạo code cuối cùng. Hãy xử lý các bước này trong cùng transaction để nếu có lỗi thì không để lại bản ghi dở dang.
+
+Khi xử lý nhãn, hãy phân biệt nhãn đã có trong database với nhãn mới. Tên nhãn được chuẩn hóa trước khi tìm; nếu đã có thì dùng lại, tránh tạo bản ghi trùng.
 
 Khi tạo response, hãy nhìn vào cấu trúc mà đề yêu cầu và chỉ trả những trường cần thiết. Dữ liệu liên quan như project, người phụ trách, nhãn hoặc lịch sử có thể không tồn tại ở mọi công việc; cách truy vấn và tạo response cần tính đến điều đó.
 

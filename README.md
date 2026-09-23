@@ -32,7 +32,7 @@ Bạn có thể làm bài trong một Web API project. Tự chọn cách sắp x
 ## Bài cần nộp
 
 - Toàn bộ source code.
-- Một file `README.md` do bạn viết, hướng dẫn cách cấu hình database, chạy ứng dụng và địa chỉ API.
+- Một file `README.md` trong thư mục source code, hướng dẫn cách cấu hình database, chạy ứng dụng và địa chỉ API.
 - `BAO-CAO-SAU-PHAN-1.md`, nộp sau ba ngày kể từ buổi làm Phần 1. Báo cáo trình bày những gì đã học, vấn đề đã gặp, kinh nghiệm rút ra và phần tự đánh giá.
 
 Leader chấm qua kết quả gọi API, dữ liệu trong PostgreSQL và source code. Bài làm cần chạy đúng cả khi dữ liệu khác với dữ liệu mẫu.
