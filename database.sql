@@ -25,7 +25,7 @@ CREATE TABLE work_items (
   assignee_id BIGINT REFERENCES developers(id) ON DELETE SET NULL,
   due_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL,
-  updated_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL,
   completed_at TIMESTAMPTZ,
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
   deleted_at TIMESTAMPTZ,
@@ -64,31 +64,33 @@ INSERT INTO developers(code, full_name, email, team, is_active) VALUES
 ('DEV03','Lê Chi','chi@example.test','Backend',true),
 ('DEV04','Phạm Dũng','dung@example.test','QA',true),
 ('DEV05','Vũ Hà','ha@example.test','Operations',true),
-('DEV06','Đỗ Khoa','khoa@example.test','Backend',false);
+('DEV06','Đỗ Khoa','khoa@example.test','Backend',false),
+('DEV07','Ngô Minh','minh@example.test','Backend',true);
 
 INSERT INTO projects(code, name, is_active) VALUES
 ('WEB','Cổng thông tin khách hàng',true),
 ('OPS','Vận hành nội bộ',true),
 ('MOB','Ứng dụng di động',true),
 ('LAB','Dự án thử nghiệm',true),
-('OLD','Dự án đã đóng',false);
+('OLD','Dự án đã đóng',false),
+('NEW','Dự án mới',true);
 
 INSERT INTO labels(name) VALUES ('backend'),('frontend'),('bug'),('urgent'),('database'),('qa');
 
 INSERT INTO work_items(code,title,description,status,priority,project_id,assignee_id,due_at,created_at,updated_at,completed_at,is_deleted,deleted_at) VALUES
-('WI-2026-000001','Sửa lỗi đăng nhập','Token hết hạn sai','InProgress','Urgent',1,1,now()-interval '2 days',now()-interval '8 days',now()-interval '1 day',NULL,false,NULL),
-('WI-2026-000002','Bổ sung trang hồ sơ',NULL,'Todo','Normal',1,2,now()+interval '7 days',now()-interval '3 days',NULL,NULL,false,NULL),
+('WI-2026-000001','Sửa lỗi đăng nhập','Token hết hạn sai','InProgress','Urgent',1,1,now()-interval '2 days',now()-interval '8 days',now()-interval '7 days',NULL,false,NULL),
+('WI-2026-000002','Bổ sung trang hồ sơ',NULL,'Todo','Normal',1,2,now()+interval '7 days',now()-interval '3 days',now()-interval '3 days',NULL,false,NULL),
 ('WI-2026-000003','Tối ưu truy vấn dashboard',NULL,'Blocked','High',1,3,now()-interval '10 days',now()-interval '20 days',now()-interval '4 days',NULL,false,NULL),
-('WI-2026-000004','Viết test thanh toán',NULL,'Done','High',1,4,now()-interval '15 days',now()-interval '30 days',now()-interval '14 days',now()-interval '14 days',false,NULL),
+('WI-2026-000004','Rà soát luồng thanh toán',NULL,'Done','High',1,4,now()-interval '15 days',now()-interval '30 days',now()-interval '14 days',now()-interval '14 days',false,NULL),
 ('WI-2026-000005','Cấu hình cảnh báo CPU',NULL,'InProgress','High',2,5,now()-interval '8 days',now()-interval '12 days',now()-interval '2 days',NULL,false,NULL),
-('WI-2026-000006','Dọn log cũ',NULL,'Todo','Low',2,NULL,now()-interval '40 days',now()-interval '50 days',NULL,NULL,false,NULL),
-('WI-2026-000007','Nâng phiên bản PostgreSQL',NULL,'Todo','Urgent',2,1,now()-interval '9 days',now()-interval '15 days',NULL,NULL,false,NULL),
+('WI-2026-000006','Dọn log cũ',NULL,'Todo','Low',2,NULL,now()-interval '40 days',now()-interval '50 days',now()-interval '50 days',NULL,false,NULL),
+('WI-2026-000007','Nâng phiên bản PostgreSQL',NULL,'Todo','Urgent',2,1,now()-interval '9 days',now()-interval '15 days',now()-interval '15 days',NULL,false,NULL),
 ('WI-2026-000008','Tài liệu trực ca',NULL,'Done','Normal',2,5,now()-interval '2 days',now()-interval '9 days',now()-interval '3 days',now()-interval '3 days',false,NULL),
 ('WI-2026-000009','Crash màn hình giỏ hàng',NULL,'Blocked','Urgent',3,2,now()-interval '3 days',now()-interval '7 days',now()-interval '1 day',NULL,false,NULL),
-('WI-2026-000010','Push notification',NULL,'Todo','Normal',3,NULL,now()+interval '12 days',now()-interval '2 days',NULL,NULL,false,NULL),
+('WI-2026-000010','Push notification',NULL,'Todo','Normal',3,NULL,now()+interval '12 days',now()-interval '2 days',now()-interval '2 days',NULL,false,NULL),
 ('WI-2026-000011','Deep link sản phẩm',NULL,'Cancelled','Low',3,2,NULL,now()-interval '25 days',now()-interval '20 days',NULL,false,NULL),
 ('WI-2026-000012','Regression release 2.0',NULL,'Done','High',3,4,now()-interval '5 days',now()-interval '18 days',now()-interval '4 days',now()-interval '4 days',false,NULL),
-('WI-2026-000013','Khảo sát thư viện mới',NULL,'Todo','Low',4,NULL,NULL,now()-interval '1 day',NULL,NULL,false,NULL),
+('WI-2026-000013','Khảo sát thư viện mới',NULL,'Todo','Low',4,NULL,NULL,now()-interval '1 day',now()-interval '1 day',NULL,false,NULL),
 ('WI-2026-000014','POC caching',NULL,'Done','Normal',4,3,now()-interval '6 days',now()-interval '10 days',now()-interval '5 days',now()-interval '5 days',false,NULL),
 ('WI-2026-000015','Item đã xoá','Không được xuất hiện','Cancelled','Normal',1,1,NULL,now()-interval '20 days',now()-interval '10 days',NULL,true,now()-interval '10 days');
 
