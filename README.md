@@ -12,6 +12,8 @@ Mỗi công việc (`work item`) thuộc một dự án (`project`), có trạng
 
 Bạn tự tạo solution và xây dựng WorkBoard từ đầu. Mỗi buổi làm bài kéo dài 8 giờ. Leader sẽ phát đề của buổi đó khi bắt đầu.
 
+Trong lúc làm, bạn có thể xem thêm `HUONG-DAN-GOI-Y.md` để tham khảo cách bắt đầu và tự rà lại tiến độ.
+
 Công nghệ bắt buộc: **ASP.NET Core .NET 10, EF Core 10 và PostgreSQL**.
 
 Trong giờ làm bài, bạn được dùng Google, tài liệu chính thức và Stack Overflow. Không được dùng AI, trao đổi hoặc nhận code từ người khác.
