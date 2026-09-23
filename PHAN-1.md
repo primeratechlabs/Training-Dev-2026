@@ -14,7 +14,18 @@ Sau khi đọc `README.md`, hãy tạo solution và xây dựng phiên bản đ�
 - Connection string đọc từ configuration hoặc environment variable.
 - Không trả stack trace, câu SQL hoặc connection string cho client.
 
-Response thành công không dùng một cấu trúc bọc chung. Body, mã HTTP và header được quy định theo từng API bên dưới; không tự thêm lớp bọc như `data`. Riêng API xóa thành công trả 204 và không có body.
+Các response thành công có body dùng chung cấu trúc dưới đây. `status` phải trùng với mã HTTP; `traceId` là mã theo dõi request; `message` là thông báo ngắn; `data` chứa kết quả theo từng API. Nội dung cụ thể của `message` không cần khớp với câu trong ví dụ.
+
+```json
+{
+  "traceId": "mã theo dõi request",
+  "status": 200,
+  "message": "Thành công",
+  "data": {}
+}
+```
+
+Riêng API xóa thành công trả 204 và không có body. Response 503 của health check cũng dùng cấu trúc riêng được nêu tại API đó.
 
 Các response lỗi của những API trong đề dùng cùng cấu trúc dưới đây, trừ response 503 của health check. `status` phải trùng với mã HTTP. `traceId` là mã theo dõi request; `message` mô tả ngắn lỗi; `errors` là object rỗng nếu lỗi không gắn với field cụ thể. Nội dung cụ thể của `message` không cần khớp với câu trong ví dụ. Khi dữ liệu đầu vào sai, `errors` ghi lỗi theo tên field:
 
@@ -44,7 +55,12 @@ GET /api/health
 Response 200:
 
 ```json
-{ "status": "ok", "dbConnected": true }
+{
+  "traceId": "mã theo dõi request",
+  "status": 200,
+  "message": "Thành công",
+  "data": { "status": "ok", "dbConnected": true }
+}
 ```
 
 Route phải kiểm tra kết nối PostgreSQL. Khi không kết nối được, trả 503 với `{ "status": "unavailable", "dbConnected": false }`.
@@ -95,28 +111,33 @@ Ví dụ response 200 khi lọc `status=InProgress&priority=Urgent&projectCode=W
 
 ```json
 {
-  "page": 1,
-  "pageSize": 20,
-  "total": 1,
-  "items": [{
-    "id": 1,
-    "code": "WI-2026-000001",
-    "title": "Sửa lỗi đăng nhập",
-    "status": "InProgress",
-    "priority": "Urgent",
-    "projectCode": "WEB",
-    "projectName": "Cổng thông tin khách hàng",
-    "assigneeId": 1,
-    "assigneeName": "Nguyễn An",
-    "dueAt": "2026-09-21T02:00:00Z",
-    "createdAt": "2026-09-15T02:00:00Z",
-    "updatedAt": "2026-09-16T02:00:00Z",
-    "labels": ["backend", "bug", "urgent"]
-  }]
+  "traceId": "mã theo dõi request",
+  "status": 200,
+  "message": "Thành công",
+  "data": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 1,
+    "items": [{
+      "id": 1,
+      "code": "WI-2026-000001",
+      "title": "Sửa lỗi đăng nhập",
+      "status": "InProgress",
+      "priority": "Urgent",
+      "projectCode": "WEB",
+      "projectName": "Cổng thông tin khách hàng",
+      "assigneeId": 1,
+      "assigneeName": "Nguyễn An",
+      "dueAt": "2026-09-21T02:00:00Z",
+      "createdAt": "2026-09-15T02:00:00Z",
+      "updatedAt": "2026-09-16T02:00:00Z",
+      "labels": ["backend", "bug", "urgent"]
+    }]
+  }
 }
 ```
 
-Kết quả ví dụ dùng các trường trong phần tử của `items`; khi assignee chưa được giao, `assigneeId` và `assigneeName` là `null`. Nhãn được sắp xếp theo tên tăng dần. Các mốc thời gian trong ví dụ tương ứng với trường hợp chạy file SQL lúc 02:00 UTC ngày 23/09/2026. File SQL dùng `now()`, nên thời gian thực tế sẽ khác. Query không hợp lệ trả 400 và chỉ rõ field lỗi. Không có kết quả vẫn trả 200 với `total: 0` và `items: []`.
+Các trường phân trang và danh sách nằm trong `data`. Khi assignee chưa được giao, `assigneeId` và `assigneeName` là `null`. Nhãn được sắp xếp theo tên tăng dần. Các mốc thời gian trong ví dụ tương ứng với trường hợp chạy file SQL lúc 02:00 UTC ngày 23/09/2026. File SQL dùng `now()`, nên thời gian thực tế sẽ khác. Query không hợp lệ trả 400 và chỉ rõ field lỗi. Không có kết quả vẫn trả 200 với `data.total: 0` và `data.items: []`.
 
 ### P1-R03. Chi tiết công việc (10 điểm)
 
@@ -124,7 +145,7 @@ Kết quả ví dụ dùng các trường trong phần tử của `items`; khi a
 GET /api/work-items/{id}
 ```
 
-Response 200 có năm phần ở cấp ngoài:
+Response 200 dùng cấu trúc chung ở trên. Trong `data` có năm phần:
 
 - `item` gồm thông tin chính của work item: `id`, `code`, `title`, `description`, `status`, `priority`, `dueAt`, `createdAt`, `updatedAt`, `completedAt`.
 - `project` gồm `code` và `name`.
@@ -174,7 +195,7 @@ Khi tạo thành công:
 - đặt `createdAt` và `updatedAt` bằng cùng một thời điểm UTC khi tạo. Thời điểm này cũng là `createdAt` của history khởi tạo;
 - trả 201;
 - header `Location` là `/api/work-items/{id}`;
-- body là một object có cùng các field với một phần tử trong `items` của API danh sách; không bọc trong `page`, `pageSize`, `total` hoặc `items`.
+- `data` là một object có cùng các field với một phần tử trong `data.items` của API danh sách; không bọc item trong `page`, `pageSize`, `total` hoặc `items`.
 
 Giá trị `title` sau khi trim là giá trị được lưu. Input sai trả 400. Project không tồn tại hoặc không active, developer không tồn tại hoặc không active trả 422. Nếu một bước ghi dữ liệu lỗi, transaction phải rollback.
 
@@ -195,7 +216,7 @@ PATCH /api/work-items/{id}/assignee
 - Mỗi request hợp lệ đều cập nhật `updated_at` và ghi một bản ghi vào `work_item_histories` trong cùng một transaction, kể cả khi assignee mới trùng với assignee hiện tại. Khi chỉ thay người phụ trách, `from_status` và `to_status` cùng bằng trạng thái hiện tại. `changedBy` của history do API này ghi là `api`.
 - Nếu `note` dài hơn 1.000 ký tự thì trả 400.
 - Nếu `note` bị bỏ trống hoặc là `null`, lưu `note: null` trong history.
-- Thành công trả 200 với một object có cùng các field với một phần tử trong `items` của API danh sách; không bọc trong `page`, `pageSize`, `total` hoặc `items`. Không tìm thấy trả 404; vi phạm nghiệp vụ trả 422.
+- Thành công trả 200; `data` là một object có cùng các field với một phần tử trong `data.items` của API danh sách, không bọc thêm trong `page`, `pageSize`, `total` hoặc `items`. Không tìm thấy trả 404; vi phạm nghiệp vụ trả 422.
 
 ### P1-R06. Xóa mềm (10 điểm)
 
@@ -215,19 +236,26 @@ DELETE /api/work-items/{id}
 GET /api/reports/project-summary?minItems=0
 ```
 
-Một dòng trong response trên dữ liệu mẫu vừa tạo:
+Một dòng trong `data` trên dữ liệu mẫu vừa tạo:
 
 ```json
-[{
-  "projectCode": "WEB",
-  "projectName": "Cổng thông tin khách hàng",
-  "totalItems": 4,
-  "openItems": 3,
-  "overdueItems": 2,
-  "doneItems": 1,
-  "averageCompletionHours": 384.0
-}]
+{
+  "traceId": "mã theo dõi request",
+  "status": 200,
+  "message": "Thành công",
+  "data": [{
+    "projectCode": "WEB",
+    "projectName": "Cổng thông tin khách hàng",
+    "totalItems": 4,
+    "openItems": 3,
+    "overdueItems": 2,
+    "doneItems": 1,
+    "averageCompletionHours": 384.0
+  }]
+}
 ```
+
+`data` là mảng các dòng báo cáo.
 
 - `from`, `to`, `minItems` là các query parameter tùy chọn. Ngày dùng dạng `YYYY-MM-DD`; `minItems` mặc định là 0 và phải không âm.
 - Báo cáo chỉ gồm project active. Project active chưa có item vẫn xuất hiện khi `minItems=0`; project inactive không xuất hiện, kể cả khi có item.

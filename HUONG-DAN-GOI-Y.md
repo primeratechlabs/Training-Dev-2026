@@ -30,7 +30,7 @@ Một số thao tác tạo hoặc cập nhật cần ghi nhiều dữ liệu có
 
 Khi xử lý nhãn, hãy phân biệt nhãn đã có trong database với nhãn mới. Tên nhãn được chuẩn hóa trước khi tìm; nếu đã có thì dùng lại, tránh tạo bản ghi trùng.
 
-Khi tạo response, hãy nhìn vào cấu trúc mà đề yêu cầu và chỉ trả những trường cần thiết. Dữ liệu liên quan như project, người phụ trách, nhãn hoặc lịch sử có thể không tồn tại ở mọi công việc; cách truy vấn và tạo response cần tính đến điều đó.
+Với response thành công có body, các trường `traceId`, `status`, `message`, `data` luôn theo cùng một cấu trúc; phần `data` thay đổi theo từng API. Hãy nhìn vào mô tả của route để biết `data` cần có những trường nào. Dữ liệu liên quan như project, người phụ trách, nhãn hoặc lịch sử có thể không tồn tại ở mọi công việc; cách truy vấn và tạo response cần tính đến điều đó.
 
 ## Khi kết quả chưa như mong đợi
 
