@@ -1,18 +1,16 @@
-# Phần 2: Ghi chú công việc trong WorkBoard
+# Phần 2: Ghi chú và lịch sử công việc trong WorkBoard
 
-**Thời gian:** 8 giờ
+**Thời gian:** 8 giờ | **Điểm tối đa:** 100
 
-**Điểm tối đa:** 100
+Trong đợt chạy thử WorkBoard, nhóm vận hành cần ghi chú vào từng công việc mà không làm đổi trạng thái. Khi mở trang chi tiết, họ muốn xem các ghi chú cùng lịch sử thay đổi trước đó.
 
-Trong đợt chạy thử WorkBoard, nhóm vận hành muốn ghi lại trao đổi gắn với từng công việc mà không làm đổi trạng thái. Họ cần xem lại toàn bộ lịch sử và thấy ghi chú mới trên trang chi tiết.
-
-Tiếp tục phát triển source code WorkBoard trong thư mục bài làm; bản source code ban đầu được giữ riêng để chấm. Cấu trúc bảng và dữ liệu mẫu nằm trong `database.sql`.
+Hãy tiếp tục phát triển source code WorkBoard trong thư mục bài làm; bản gốc được giữ riêng để chấm. Cấu trúc bảng và dữ liệu mẫu có trong `database.sql`.
 
 ## Quy ước response
 
-Các API trả về JSON, tên trường theo camelCase. Trạng thái và mức ưu tiên trả về bằng tên. Thời gian dùng định dạng ISO-8601, có UTC `Z` hoặc offset. `traceId` là mã theo dõi request.
+Mọi API trả về JSON. Tên trường dùng camelCase; trạng thái và mức ưu tiên trả về bằng tên. Thời gian dùng định dạng ISO 8601, kèm `Z` nếu ở UTC hoặc offset múi giờ. `traceId` là mã theo dõi request.
 
-Response thành công có body theo cấu trúc sau. `status` phải trùng với mã HTTP; `data` chứa kết quả của API.
+Body của response thành công có cấu trúc sau. `status` phải trùng với mã HTTP, còn `data` chứa kết quả của API.
 
 ```json
 {
@@ -23,7 +21,7 @@ Response thành công có body theo cấu trúc sau. `status` phải trùng vớ
 }
 ```
 
-Response lỗi dùng cấu trúc dưới đây. `errors` là object rỗng nếu lỗi không gắn với trường cụ thể; nếu dữ liệu đầu vào sai, ghi lỗi theo tên trường. `status` phải trùng với mã HTTP. `message` nêu ngắn gọn nguyên nhân lỗi.
+Body của response lỗi có cấu trúc dưới đây. Nếu lỗi không gắn với trường cụ thể, để `errors` là object rỗng. Nếu dữ liệu đầu vào không hợp lệ, dùng tên trường làm key trong `errors` và ghi nội dung lỗi tương ứng. `status` phải trùng với mã HTTP; `message` nêu ngắn gọn nguyên nhân lỗi.
 
 ```json
 {
@@ -36,7 +34,7 @@ Response lỗi dùng cấu trúc dưới đây. `errors` là object rỗng nếu
 }
 ```
 
-## 1. Ghi nhận và hiển thị ghi chú — 65 điểm
+## 1. Ghi và hiển thị ghi chú — 65 điểm
 
 ```http
 POST /api/work-items/{id}/notes
@@ -48,23 +46,23 @@ Request:
 { "note": "Đã thống nhất cách xử lý với nhóm giao diện" }
 ```
 
-- `id` phải là số nguyên dương. ID sai định dạng hoặc nhỏ hơn 1 trả 400; công việc không tồn tại hoặc đã bị xóa mềm trả 404.
-- `note` là chuỗi bắt buộc. Bỏ khoảng trắng ở đầu và cuối trước khi lưu; nội dung sau khi bỏ khoảng trắng dài từ 1 đến 1.000 ký tự. Dữ liệu không hợp lệ trả 400 và chỉ rõ lỗi ở `note`.
-- Có thể ghi chú cho mọi công việc chưa bị xóa, kể cả công việc đã Done hoặc Cancelled.
-- Tạo một bản ghi trong `work_item_histories`. `fromStatus` và `toStatus` cùng bằng trạng thái hiện tại của công việc; `changedBy` là `api`. Không đổi trạng thái.
-- Cập nhật `updated_at` của công việc. Thời điểm tạo bản ghi lịch sử và `updated_at` phải là cùng một thời điểm UTC.
-- Bản ghi lịch sử và cập nhật của công việc phải cùng được lưu hoặc cùng bị hủy nếu có lỗi.
-- Thành công trả 201, có header `Location: /api/work-items/{id}/history`. Trong `data` trả về bản ghi lịch sử vừa tạo, gồm `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`.
+- `id` phải là số nguyên dương. Nếu ID sai định dạng hoặc nhỏ hơn 1, trả 400. Nếu công việc không tồn tại hoặc đã bị xóa mềm, trả 404.
+- `note` phải là chuỗi và không được để trống. Bỏ khoảng trắng ở đầu và cuối trước khi lưu; nội dung sau khi bỏ khoảng trắng phải dài từ 1 đến 1.000 ký tự. Nếu không hợp lệ, trả 400 và nêu lỗi ở `note`.
+- Có thể ghi chú cho mọi công việc chưa bị xóa mềm, kể cả công việc có trạng thái `Done` hoặc `Cancelled`.
+- Tạo một bản ghi trong `work_item_histories`. Trong bản ghi, `fromStatus` và `toStatus` đều bằng trạng thái hiện tại của công việc, còn `changedBy` là `api`. Ghi chú không làm đổi trạng thái công việc.
+- Cập nhật `updated_at` của công việc. Giá trị này phải bằng `created_at` của bản ghi lịch sử; cả hai thời điểm đều theo UTC.
+- Lưu bản ghi lịch sử và cập nhật công việc cùng nhau. Nếu có lỗi, không để lại riêng một trong hai thay đổi.
+- Khi ghi chú thành công, trả 201 cùng header `Location: /api/work-items/{id}/history`. Trong `data`, trả về bản ghi vừa tạo với các trường `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`.
 
-Trong response thành công của `GET /api/work-items/{id}`, `data` gồm `item`, `project`, `assignee`, `labels` và `history`. Sau khi ghi chú thành công, mục `history` có bản ghi ghi chú vừa tạo.
+Khi gọi `GET /api/work-items/{id}`, response thành công trả 200. Trong `data` có `item`, `project`, `assignee`, `labels` và `history`. Ghi chú vừa tạo cũng phải xuất hiện trong `history`.
 
 - `item` gồm `id`, `code`, `title`, `description`, `status`, `priority`, `dueAt`, `createdAt`, `updatedAt` và `completedAt`. `description`, `dueAt` và `completedAt` có thể là `null`.
-- `project`: `code` và `name`.
-- `assignee`: `id`, `code` và `fullName`; trả `null` nếu chưa có người phụ trách.
-- `labels`: mảng tên nhãn, sắp xếp tăng dần theo tên.
-- `history`: mảng gồm toàn bộ bản ghi lịch sử của công việc, mỗi bản ghi có `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`. Sắp xếp tăng dần theo `createdAt`; nếu trùng thời điểm thì sắp xếp theo `id` tăng dần. Trường không có giá trị được trả về là `null`; chưa có bản ghi thì trả mảng rỗng.
+- `project` có `code` và `name`.
+- `assignee` có `id`, `code` và `fullName`; nếu chưa có người phụ trách thì trả `null`.
+- `labels` là mảng tên nhãn, sắp xếp theo tên tăng dần.
+- `history` gồm toàn bộ bản ghi lịch sử của công việc. Mỗi bản ghi có `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`. Sắp xếp theo `createdAt` tăng dần; nếu hai bản ghi cùng thời điểm thì sắp xếp theo `id` tăng dần. Trường không có giá trị thì trả về `null`; nếu chưa có bản ghi, trả mảng rỗng.
 
-Request hợp lệ cho công việc đang tồn tại trả 200. ID của route chi tiết sai định dạng hoặc nhỏ hơn 1 trả 400; công việc không tồn tại hoặc đã bị xóa mềm trả 404.
+Với route chi tiết, ID sai định dạng hoặc nhỏ hơn 1 thì trả 400. Nếu công việc không tồn tại hoặc đã bị xóa mềm, trả 404.
 
 ## 2. Xem lịch sử — 25 điểm
 
@@ -72,34 +70,33 @@ Request hợp lệ cho công việc đang tồn tại trả 200. ID của route 
 GET /api/work-items/{id}/history
 ```
 
-- ID sai định dạng hoặc nhỏ hơn 1 trả 400. Công việc không tồn tại hoặc đã bị xóa mềm trả 404.
-- Thành công trả 200. `data` là mảng các bản ghi gồm `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`. Trường nào không có giá trị thì trả `null`.
-- Trả đủ bản ghi lịch sử hiện có. Sắp xếp theo `createdAt` tăng dần; nếu trùng thời điểm thì sắp xếp theo `id` tăng dần.
-- Công việc chưa có bản ghi lịch sử trả 200 với `data: []`.
+- ID sai định dạng hoặc nhỏ hơn 1 thì trả 400. Nếu công việc không tồn tại hoặc đã bị xóa mềm, trả 404.
+- Request thành công trả 200. `data` là mảng bản ghi; mỗi bản ghi có `id`, `fromStatus`, `toStatus`, `note`, `changedBy` và `createdAt`. Trường không có giá trị thì trả về `null`.
+- Trả đủ bản ghi lịch sử của công việc và sắp xếp theo `createdAt` tăng dần. Nếu hai bản ghi cùng thời điểm, sắp xếp theo `id` tăng dần.
+- Nếu công việc chưa có bản ghi lịch sử, trả 200 với `data: []`.
 
-## 3. Phần mở rộng: lọc theo ngày — 10 điểm
+## 3. Phần mở rộng: lọc lịch sử theo ngày — 10 điểm
 
-Cho phép lọc các bản ghi lịch sử bằng hai tham số query tùy chọn:
+API xem lịch sử nhận thêm hai query parameter tùy chọn:
 
 ```text
 from=2026-09-01
 to=2026-09-30
 ```
 
-Lọc theo `createdAt`, với ngày theo dạng `YYYY-MM-DD` và được hiểu theo UTC. `from` tính từ đầu ngày được chọn; `to` bao gồm hết ngày được chọn. Có thể gửi riêng từng tham số. Ngày sai định dạng trả 400 và chỉ rõ tham số bị lỗi; nếu `from` muộn hơn `to`, lỗi phải nêu cả hai tham số. Thực hiện lọc trong truy vấn database.
+Lọc bản ghi theo `createdAt`. Ngày phải theo dạng `YYYY-MM-DD` và được hiểu theo UTC. Mốc `from` tính từ đầu ngày được chọn; mốc `to` bao gồm hết ngày đó. Có thể gửi riêng từng tham số. Ngày sai định dạng trả 400 và ghi lỗi theo tên tham số trong `errors`. Nếu `from` muộn hơn `to`, ghi lỗi cho cả hai tham số trong `errors`. Thực hiện lọc trong truy vấn database.
 
 ## Gợi ý
 
-- Xem cách các bảng `work_items` và `work_item_histories` liên hệ với nhau trong `database.sql`.
-- Khi ghi chú, cần xác định trạng thái hiện tại của công việc và lưu các thay đổi liên quan cùng nhau.
-- Trang chi tiết và API lịch sử cùng hiển thị dữ liệu từ `work_item_histories`; hãy giữ kết quả nhất quán giữa hai nơi.
-- Với phần lọc ngày, xác định điều kiện và thứ tự sắp xếp trước khi lấy dữ liệu trả về.
-- Bạn tự chọn cách chia file và cách xử lý để code dễ theo dõi.
+- Trong `database.sql`, bạn có thể xem mối liên hệ giữa `work_items` và `work_item_histories`.
+- Trang chi tiết và API lịch sử cùng đọc dữ liệu từ `work_item_histories`, nên kết quả ở hai nơi cần nhất quán.
+- Với bộ lọc ngày, hãy xác định khoảng thời gian cần lấy và thứ tự sắp xếp.
+- Bạn có thể tự chọn cách chia file và tổ chức phần xử lý.
 
 ## Bài cần nộp
 
-- Toàn bộ source code sau Phần 2.
+- Toàn bộ source code sau khi hoàn thành.
 - File `README.md` hướng dẫn cấu hình database, chạy ứng dụng và gọi các API mới.
-- `BAO-CAO-SAU-PHAN-1.md`, hoàn thành sau thời gian tự học và nộp trước khi bắt đầu phần code Phần 2.
+- File `BAO-CAO-SAU-PHAN-1.md`, hoàn thành sau thời gian tự học và nộp trước khi bắt đầu làm phần code.
 
-Các quy định sử dụng công cụ và cách bàn giao đã nêu trong README vẫn áp dụng.
+Các quy định về công cụ và cách nộp bài trong `README.md` vẫn áp dụng.
